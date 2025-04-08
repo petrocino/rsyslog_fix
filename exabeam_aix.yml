@@ -1,0 +1,26 @@
+# Add Exabeam servers to AIX syslog
+# For AIX, this should be appended into /etc/syslog.conf file
+# Author: Alessandro Petrocino
+# Date: 2025-04-07
+#
+---
+- name: Append Exabeam syslog config to AIX servers
+  hosts: all
+  become: true
+  tasks:
+    - name: Backup /etc/syslog.conf
+      copy:
+        src: /etc/syslog.conf
+        dest: "/etc/syslog.conf.bak_{{ ansible_date_time.iso8601 | regex_replace('[:T]', '_') }}"
+        remote_src: true
+
+    - name: Append new syslog entries
+      blockinfile:
+        path: /etc/syslog.conf
+        marker: "# {mark} EXABEAM SYSLOG BLOCK"
+        content: "{{ lookup('file', '/depotux/br004789/changes/CHG_exabeam_low/aix_rsylog_add.file') }}"
+        create: false
+        insertafter: EOF
+
+    - name: Refresh syslogd on AIX
+      command: refresh -s syslogd

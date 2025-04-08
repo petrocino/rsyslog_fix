@@ -1,0 +1,22 @@
+# Add Exabeam servers to Linux rsyslog
+# For Linux, this should be added into /etc/rsyslog.d/ dir
+# Author: Alessandro Petrocino
+# Date: 2025-04-07
+#
+---
+- name: Add Exabeam syslog config to Linux servers
+  hosts: all
+  become: true
+  tasks:
+    - name: Copy rsyslog configuration file
+      copy:
+        src: /depotux/br004789/changes/CHG_exabeam_low/90-exabeam.conf
+        dest: /etc/rsyslog.d/90-exabeam.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Restart rsyslog
+      service:
+        name: rsyslog
+        state: restarted
